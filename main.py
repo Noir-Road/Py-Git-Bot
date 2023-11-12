@@ -20,6 +20,7 @@ def main() -> None:
 
     # Git commands
     dp.add_handler(CommandHandler('gitlog', gitlog))
+    #### need to add the rest of the handles
 
     # See data stored
     dp.add_handler(CommandHandler('getreponame', get_repo_name))
