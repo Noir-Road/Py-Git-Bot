@@ -1,5 +1,5 @@
 import requests
-from telegram import Update
+from telegram import ParseMode, Update
 import telegram
 from git_config import repo_name, repo_owner, git_token
 import base64
@@ -122,7 +122,6 @@ def file_handler(update: Update, context):
         update.message.reply_text(formatted_content, parse_mode='Markdown')
 
 
-
 # Show all available branches in the repository.
 def branches(update: Update, context):
     user_id = update.message.from_user.id
@@ -148,25 +147,25 @@ def branches(update: Update, context):
     message = 'Available branches:\n\n' + '\n'.join(branch_names)
     update.message.reply_text(message)
 
-
-### List files in a specific folder of the repository.
+# Show a list of the folders
 def ls(update: Update, context):
     user_id = update.message.from_user.id
     if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
+
     # Retrieve the selected branch from the user's context
     branch_name = context.user_data.get('branch', 'main')
 
     # Parse the folder path from the message
     message = update.message.text.split()
+    folder_path = ""
     if len(message) > 1:
-        folder_path = message[1]
-    else:
-        folder_path = ""
+    # Join the parts inside quotes and remove the quotes
+        folder_path = " ".join(part.strip('"') for part in message[1:])
 
     # Fetch the contents of the folder from the GitHub repository
-    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/branches'
+    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/contents/{folder_path}?ref={branch_name}'
     headers = {'Authorization': f'token {git_token[update.message.from_user.id]}'}
     response = requests.get(url, headers=headers)
 
@@ -221,7 +220,7 @@ def repo_info(update: Update, context):
 
     update.message.reply_text(message)
 
-### Switch between multiple branches on the repo, needs to specify and parse the branch name
+# Switch between multiple branches on the repo, needs to specify and parse the branch name
 def switch(update: Update, context):
     user_id = update.message.from_user.id
     if not check_repo_info(user_id):
@@ -243,8 +242,41 @@ def switch(update: Update, context):
 
     update.message.reply_text(f'Switched to branch "{branch_name}"')
 
+# Print/Fetch repository information
+def repo_info(update: Update, context):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
+        update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
+        return
+
+    # Fetch repository information
+    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}'
+    headers = {'Authorization': f'token {git_token[update.message.from_user.id]}'}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        update.message.reply_text('An error occurred while fetching the repository information.')
+        return
+
+    data = response.json()
+    repo_title = data['name']
+    repo_description = data['description']
+    repo_url = data['html_url']
+
+    message = f"Repository Name: {repo_title}\n\n"
+    message += f"Description: {repo_description}\n\n"
+    message += f"URL: {repo_url}"
+
+    update.message.reply_text(message)
 
 
+# Unknown commands
+def unknown_command(update, context):
+    message = "Sorry, I didn't understand that command. Please use /help to see the available commands."
+    update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
+
+
+# Simple return function to get stored data of the repo name, owner & git token
 def check_repo_info(user_id):
     return (
         user_id in repo_owner

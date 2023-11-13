@@ -1,8 +1,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from git_config import set_repo_name, set_repo_owner, set_token, handle_text
 from data import get_repo_name, get_repo_owner, get_token
-from repodata import repo_info
-from git_commands import gitlog
+from git_commands import gitlog, branches, switch, file_handler, ls, repo_info, unknown_command
 from help import help
 
 def main() -> None:
@@ -14,6 +13,11 @@ def main() -> None:
     dp.add_handler(CommandHandler('setreponame', set_repo_name))
     dp.add_handler(CommandHandler('setowner', set_repo_owner))
     dp.add_handler(CommandHandler('settoken', set_token))
+    dp.add_handler(CommandHandler('repoinfo', repo_info))
+    dp.add_handler(CommandHandler('branch', branches))
+    dp.add_handler(CommandHandler('switch', switch))
+    dp.add_handler(CommandHandler('file', file_handler))
+    dp.add_handler(CommandHandler('ls', ls))
 
     # View a list of commnads & set-up
     dp.add_handler(CommandHandler('help', help))
@@ -27,16 +31,16 @@ def main() -> None:
     dp.add_handler(CommandHandler("getowner", get_repo_owner))
     dp.add_handler(CommandHandler('gettoken', get_token))
 
-    # Get details regarding the repo details
-    dp.add_handler(CommandHandler('repoinfo', repo_info))
+    # Fallback handler for unknown commands
+    dp.add_handler(MessageHandler(Filters.command, unknown_command))
 
     # User response handler
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_text))
 
-    # Iniciamos el bot
+    # Bot Trigger
     updater.start_polling()
 
-    # Mantenemos el bot en ejecución
+    # Keep bot running
     updater.idle()
 
 if __name__ == '__main__':

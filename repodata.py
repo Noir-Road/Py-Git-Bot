@@ -2,19 +2,6 @@ import requests
 from telegram import Update
 from git_config import repo_name, repo_owner, git_token
 
-# The repo name
-#REPO_NAME = 'Audio-Alchemist'
-
-# The Owner of the repo from GitHub
-#REPO_OWNER = 'Noir-Road'
-
-# GitHub token for private repos
-#GITHUB_TOKEN = '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'
-
-# Replace with the allowed user ids
-#ALLOWED_USERS = [5510969517]
-
-
 def repo_info(update: Update, context):
     """Show information about the GitHub repository."""
 
