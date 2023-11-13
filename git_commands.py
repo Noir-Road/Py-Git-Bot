@@ -8,15 +8,8 @@ from help import MAX_MESSAGE_LENGTH
 
 # Get the last or latest gitlog information
 def gitlog(update, context):
-    # Check if repo_owner, repo_name, or git_token are not set
-    if (
-        update.message.from_user.id not in repo_owner
-        or update.message.from_user.id not in repo_name
-        or update.message.from_user.id not in git_token
-        or not repo_owner[update.message.from_user.id]
-        or not repo_name[update.message.from_user.id]
-        or not git_token[update.message.from_user.id]
-    ):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
 
@@ -85,14 +78,8 @@ def gitlog(update, context):
 
 # Print a file from a GitHub repository in Telegram
 def file_handler(update: Update, context):
-    if (
-        update.message.from_user.id not in repo_owner
-        or update.message.from_user.id not in repo_name
-        or update.message.from_user.id not in git_token
-        or not repo_owner[update.message.from_user.id]
-        or not repo_name[update.message.from_user.id]
-        or not git_token[update.message.from_user.id]
-    ):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
     # Retrieve the selected branch from the user's context
@@ -138,14 +125,8 @@ def file_handler(update: Update, context):
 
 # Show all available branches in the repository.
 def branches(update: Update, context):
-    if (
-        update.message.from_user.id not in repo_owner
-        or update.message.from_user.id not in repo_name
-        or update.message.from_user.id not in git_token
-        or not repo_owner[update.message.from_user.id]
-        or not repo_name[update.message.from_user.id]
-        or not git_token[update.message.from_user.id]
-    ):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
     # Fetch the list of branches
@@ -170,14 +151,8 @@ def branches(update: Update, context):
 
 ### List files in a specific folder of the repository.
 def ls(update: Update, context):
-    if (
-        update.message.from_user.id not in repo_owner
-        or update.message.from_user.id not in repo_name
-        or update.message.from_user.id not in git_token
-        or not repo_owner[update.message.from_user.id]
-        or not repo_name[update.message.from_user.id]
-        or not git_token[update.message.from_user.id]
-    ):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
     # Retrieve the selected branch from the user's context
@@ -221,15 +196,8 @@ def ls(update: Update, context):
 
 # Show information about the GitHub repository.
 def repo_info(update: Update, context):
-    # Check if repo_owner, repo_name, or git_token are not set
-    if (
-        update.message.from_user.id not in repo_owner
-        or update.message.from_user.id not in repo_name
-        or update.message.from_user.id not in git_token
-        or not repo_owner[update.message.from_user.id]
-        or not repo_name[update.message.from_user.id]
-        or not git_token[update.message.from_user.id]
-    ):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
 
@@ -255,14 +223,8 @@ def repo_info(update: Update, context):
 
 ### Switch between multiple branches on the repo, needs to specify and parse the branch name
 def switch(update: Update, context):
-    if (
-        update.message.from_user.id not in repo_owner
-        or update.message.from_user.id not in repo_name
-        or update.message.from_user.id not in git_token
-        or not repo_owner[update.message.from_user.id]
-        or not repo_name[update.message.from_user.id]
-        or not git_token[update.message.from_user.id]
-    ):
+    user_id = update.message.from_user.id
+    if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
     
@@ -280,3 +242,15 @@ def switch(update: Update, context):
     context.user_data['branch'] = branch_name
 
     update.message.reply_text(f'Switched to branch "{branch_name}"')
+
+
+
+def check_repo_info(user_id):
+    return (
+        user_id in repo_owner
+        and user_id in repo_name
+        and user_id in git_token
+        and repo_owner[user_id]
+        and repo_name[user_id]
+        and git_token[user_id]
+    )
