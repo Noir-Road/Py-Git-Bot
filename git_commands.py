@@ -90,10 +90,11 @@ def file_handler(update: Update, context):
 
     if len(message) < 2:
         update.message.reply_text('Please provide the file path along with the command.\n\n'
-                                  'Example: /file path/to/file.txt')
-        return
+                              'Example: /file "path/to/file.txt"')
 
-    file_path = message[1]
+    # Join the parts inside quotes and remove the quotes
+    file_path = " ".join(part.strip('"') for part in message[1])
+
 
     # Fetch the file content from the GitHub repository
     url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/branches'
