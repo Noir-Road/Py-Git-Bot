@@ -76,54 +76,54 @@ def gitlog(update, context):
     update.message.reply_text(message, parse_mode='HTML', reply_markup=telegram.ReplyKeyboardRemove())
 
 # Prints a file from the repo directly on Telegram
-def file_handler(update: Update, context):
-    user_id = update.message.from_user.id
-    if not check_repo_info(user_id):
-        update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
-        return
-
-    # Retrieve the selected branch from the user's context
-    branch_name = context.user_data.get('branch', 'main')
-
-    # Parse the file path from the message
-    message = update.message.text.split()
-
-    if len(message) < 2:
-        update.message.reply_text('Please provide the file path along with the command.\n\n'
-                                  'Example: /file path/to/file.txt')
-        return
-
-    # Join all the elements of the message after the command ("/file") into the file path
-    file_path = ' '.join(message[1:])
-
-    # Enclose the file path in double quotes to handle spaces
-    file_path = f'"{file_path}"'
-
-    # Fetch the file content from the GitHub repository
-    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/contents/{file_path}?ref={branch_name}'
-    headers = {'Authorization': f'token {git_token[update.message.from_user.id]}'}
-    response = requests.get(url, headers=headers)
-
-    if response.status_code != 200:
-        update.message.reply_text('An error occurred while fetching the file from the repository.')
-        return
-
-    data = response.json()
-
-    if 'content' not in data:
-        update.message.reply_text('File not found.')
-        return
-
-    file_content = base64.b64decode(data['content']).decode('utf-8')
-
-    # Split the file content into chunks
-    message_chunks = [file_content[i:i + MAX_MESSAGE_LENGTH] for i in
-                      range(0, len(file_content), MAX_MESSAGE_LENGTH)]
-
-    # Send each message chunk as a separate message
-    for chunk in message_chunks:
-        formatted_content = f"```\n{chunk}\n```"  # Add backticks around the content
-        update.message.reply_text(formatted_content, parse_mode='Markdown')
+#def file_handler(update: Update, context):
+#    user_id = update.message.from_user.id
+#    if not check_repo_info(user_id):
+#        update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
+#        return
+#
+#    # Retrieve the selected branch from the user's context
+#    branch_name = context.user_data.get('branch', 'main')
+#
+#    # Parse the file path from the message
+#    message = update.message.text.split()
+#
+#    if len(message) < 2:
+#        update.message.reply_text('Please provide the file path along with the command.\n\n'
+#                                  'Example: /file path/to/file.txt')
+#        return
+#
+#    # Join all the elements of the message after the command ("/file") into the file path
+#    file_path = ' '.join(message[1:])
+#
+#    # Enclose the file path in double quotes to handle spaces
+#    file_path = f'"{file_path}"'
+#
+#    # Fetch the file content from the GitHub repository
+#    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/contents/{file_path}?ref={branch_name}'
+#    headers = {'Authorization': f'token {git_token[update.message.from_user.id]}'}
+#    response = requests.get(url, headers=headers)
+#
+#    if response.status_code != 200:
+#        update.message.reply_text('An error occurred while fetching the file from the repository.')
+#        return
+#
+#    data = response.json()
+#
+#    if 'content' not in data:
+#        update.message.reply_text('File not found.')
+#        return
+#
+#    file_content = base64.b64decode(data['content']).decode('utf-8')
+#
+#    # Split the file content into chunks
+#    message_chunks = [file_content[i:i + MAX_MESSAGE_LENGTH] for i in
+#                      range(0, len(file_content), MAX_MESSAGE_LENGTH)]
+#
+#    # Send each message chunk as a separate message
+#    for chunk in message_chunks:
+#        formatted_content = f"```\n{chunk}\n```"  # Add backticks around the content
+#        update.message.reply_text(formatted_content, parse_mode='Markdown')
 
 
 
