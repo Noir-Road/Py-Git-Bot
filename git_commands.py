@@ -75,13 +75,13 @@ def gitlog(update, context):
 
     update.message.reply_text(message, parse_mode='HTML', reply_markup=telegram.ReplyKeyboardRemove())
 
-
-# Print a file from a GitHub repository in Telegram
+# Prints a file from the repo directly on Telegram
 def file_handler(update: Update, context):
     user_id = update.message.from_user.id
     if not check_repo_info(user_id):
         update.message.reply_text('Please set the repository owner, name, and GitHub token first.')
         return
+
     # Retrieve the selected branch from the user's context
     branch_name = context.user_data.get('branch', 'main')
 
@@ -90,14 +90,17 @@ def file_handler(update: Update, context):
 
     if len(message) < 2:
         update.message.reply_text('Please provide the file path along with the command.\n\n'
-                              'Example: /file "path/to/file.txt"')
+                                  'Example: /file path/to/file.txt')
+        return
 
-    # Join the parts inside quotes and remove the quotes
-    file_path = " ".join(part.strip('"') for part in message[1])
+    # Join all the elements of the message after the command ("/file") into the file path
+    file_path = ' '.join(message[1:])
 
+    # Enclose the file path in double quotes to handle spaces
+    file_path = f'"{file_path}"'
 
     # Fetch the file content from the GitHub repository
-    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/branches'
+    url = f'https://api.github.com/repos/{repo_owner[update.message.from_user.id]}/{repo_name[update.message.from_user.id]}/contents/{file_path}?ref={branch_name}'
     headers = {'Authorization': f'token {git_token[update.message.from_user.id]}'}
     response = requests.get(url, headers=headers)
 
@@ -121,6 +124,7 @@ def file_handler(update: Update, context):
     for chunk in message_chunks:
         formatted_content = f"```\n{chunk}\n```"  # Add backticks around the content
         update.message.reply_text(formatted_content, parse_mode='Markdown')
+
 
 
 # Show all available branches in the repository.
